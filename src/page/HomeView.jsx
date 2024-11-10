@@ -92,14 +92,21 @@ function HomeView({ shops, error, loading }) {
         </ul>
       </div>
 
-      <main className="flex justify-center items-center min-h-screen bg-gray-100 pt-16 p-4">
-        {loading && (
-          <p className="text-blue-800 text-4xl font-semibold">Loading...</p>
-        )}
-        {error && (
-          <p className="text-red-500 text-4xl font-semibold">{error}</p>
-        )}
-        {!loading && !error && (
+      {loading && (
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-100">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full animate-spin"></div>
+          <p className="text-blue-800 text-2xl font-semibold mt-4">
+            Loading...
+          </p>
+        </div>
+      )}
+      {error && (
+        <div className="flex justify-center items-center fixed inset-0 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md">
+          {error}
+        </div>
+      )}
+      {!loading && !error && (
+        <main className="flex justify-center items-center min-h-screen bg-gray-100 pt-16 p-4">
           <section className="w-full max-w-7xl mx-auto mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {shops.map((shop, index) => (
               <div
@@ -142,8 +149,8 @@ function HomeView({ shops, error, loading }) {
               </div>
             ))}
           </section>
-        )}
-      </main>
+        </main>
+      )}
 
       {isMobileMenuOpen && (
         <div
