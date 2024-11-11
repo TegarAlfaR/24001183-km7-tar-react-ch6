@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import HomeView from "./page/HomeView";
+import HomeView from "./page/ProductsView";
 import AboutView from "./page/AboutView";
 import NotFoundView from "./page/NotFoundView";
 import { LoginPage } from "./page/Login";
@@ -16,29 +16,21 @@ const App = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Function to determine search parameters based on input
   const getSearchParams = (query) => {
     const params = {
       limit: itemsPerPage,
       page: currentPage,
     };
 
-    // If query is empty, return basic params
     if (!query) return params;
-
-    // Check if query is a number
     const numericValue = Number(query);
     if (!isNaN(numericValue)) {
-      // If it's a number, it could be price or stock
       if (numericValue > 1000) {
-        // Assume price if number is large
         params.price = numericValue;
       } else {
-        // Assume stock if number is small
         params.stock = numericValue;
       }
     } else {
-      // If it's not a number, treat as product name
       params.productName = query;
     }
 
