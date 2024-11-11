@@ -2,10 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import HomeView from "./page/ProductsView";
-import AboutView from "./page/AboutView";
-import NotFoundView from "./page/NotFoundView";
-import { LoginPage } from "./page/Login";
-import { RegisterPage } from "./page/Register";
+import Login from "./page/Login";
+import NavbarTailwind from "./components/navbar/NavbarTailwind";
 
 const App = () => {
   const [shops, setShops] = useState([]);
@@ -42,8 +40,13 @@ const App = () => {
     setError(null);
 
     try {
+      const token = localStorage.getItem("token");
+
       const response = await axios.get("http://localhost:3000/api/v1/shops", {
         params: getSearchParams(searchQuery),
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = response.data;
@@ -99,36 +102,31 @@ const App = () => {
     {
       path: "/",
       element: (
-        <HomeView
-          shops={shops}
-          error={error}
-          loading={loading}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          handlePreviousPage={handlePreviousPage}
-          handleNextPage={handleNextPage}
-          handleItemsPerPageChange={handleItemsPerPageChange}
-          itemsPerPage={itemsPerPage}
-        />
+        <>
+          <HomeView
+            shops={shops}
+            error={error}
+            loading={loading}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            handlePreviousPage={handlePreviousPage}
+            handleNextPage={handleNextPage}
+            handleItemsPerPageChange={handleItemsPerPageChange}
+            itemsPerPage={itemsPerPage}
+          />
+        </>
       ),
     },
     {
-      path: "/about",
-      element: <AboutView />,
-    },
-    {
-      path: "/not-found",
-      element: <NotFoundView />,
-    },
-    {
       path: "/login",
-      element: <LoginPage />,
-    },
-    {
-      path: "/register",
-      element: <RegisterPage />,
+      element: (
+        <>
+          <NavbarTailwind />
+          <Login />,
+        </>
+      ),
     },
   ]);
 
