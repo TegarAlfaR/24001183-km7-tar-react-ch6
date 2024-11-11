@@ -14,9 +14,15 @@ function HomeView({
   itemsPerPage,
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSearchQuery(localSearchQuery);
   };
 
   return (
@@ -104,12 +110,12 @@ function HomeView({
       {!loading && !error && (
         <main className="flex flex-col items-center min-h-screen bg-gray-100 p-4">
           <div className="w-full max-w-3xl mx-auto mb-3 mt-16">
-            <div className="relative flex gap-2">
+            <form onSubmit={handleSubmit} className="relative flex gap-2">
               <input
                 type="text"
                 placeholder="Search for product name, stock, price..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={localSearchQuery}
+                onChange={(e) => setLocalSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 focus:outline-none transition-all duration-200"
               />
               <svg
@@ -126,7 +132,13 @@ function HomeView({
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
-            </div>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
+              >
+                Search
+              </button>
+            </form>
           </div>
 
           <div className="mb-4">
@@ -144,8 +156,9 @@ function HomeView({
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
-              <option value={15}>15</option>
               <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
             </select>
           </div>
 
@@ -184,35 +197,46 @@ function HomeView({
                 </div>
               ))
             ) : (
-              <div className="col-span-full flex flex-col justify-center items-center text-center text-gray-500 py-24 w-max">
-                {searchQuery && (
-                  <>
-                    <p className="text-lg font-semibold">
-                      Not found for "{searchQuery}"
-                    </p>
-                    <p>Try searching for something else.</p>
-                  </>
-                )}
+              <div className="col-span-full flex flex-col justify-center items-center text-center text-gray-500 py-24">
+                <svg
+                  className="w-16 h-16 text-gray-400 mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="text-xl font-semibold mb-2">
+                  No results found for "{searchQuery}"
+                </p>
+                <p className="text-gray-400">
+                  Try adjusting your search to find what you're looking for.
+                </p>
               </div>
             )}
           </section>
 
           {shops.length > 0 && (
-            <div className="flex justify-center space-x-4 mt-6">
+            <div className="flex justify-center items-center space-x-4 mt-6">
               <button
                 onClick={handlePreviousPage}
                 disabled={currentPage === 1}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg disabled:opacity-50"
+                className="px-4 py-2 bg-green-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-600 transition-colors duration-200"
               >
                 Previous
               </button>
-              <span className="text-lg">
+              <span className="text-lg font-medium">
                 Page {currentPage} of {totalPages}
               </span>
               <button
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg disabled:opacity-50"
+                className="px-4 py-2 bg-green-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-600 transition-colors duration-200"
               >
                 Next
               </button>

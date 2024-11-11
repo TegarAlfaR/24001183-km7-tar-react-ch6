@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-
 import HomeView from "./page/HomeView";
 import AboutView from "./page/AboutView";
 import NotFoundView from "./page/NotFoundView";
@@ -14,55 +12,83 @@ const App = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterProduct, setFilterProduct] = useState([]);
-
+  const [totalItems, setTotalItems] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  useEffect(() => {
-    const fetchShops = async () => {
-      setLoading(true);
-      try {
-        const respon = await axios.get("http://localhost:3000/api/v1/shops");
-        console.log(respon);
-
-        const data = respon.data;
-        if (data.isSuccess) {
-          setShops(data.data.shops);
-        } else {
-          setError("error");
-        }
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
+  // Function to determine search parameters based on input
+  const getSearchParams = (query) => {
+    const params = {
+      limit: itemsPerPage,
+      page: currentPage,
     };
 
-    fetchShops();
-  }, []);
+    // If query is empty, return basic params
+    if (!query) return params;
+
+    // Check if query is a number
+    const numericValue = Number(query);
+    if (!isNaN(numericValue)) {
+      // If it's a number, it could be price or stock
+      if (numericValue > 1000) {
+        // Assume price if number is large
+        params.price = numericValue;
+      } else {
+        // Assume stock if number is small
+        params.stock = numericValue;
+      }
+    } else {
+      // If it's not a number, treat as product name
+      params.productName = query;
+    }
+
+    return params;
+  };
+
+  const fetchShops = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.get("http://localhost:3000/api/v1/shops", {
+        params: getSearchParams(searchQuery),
+      });
+
+      const data = response.data;
+      if (data.isSuccess) {
+        setShops(data.data.shops);
+        setTotalItems(data.pagination.totalRow);
+      } else {
+        setShops([]);
+        setTotalItems(0);
+      }
+    } catch (error) {
+      if (error.response) {
+        if (error.response.status === 404) {
+          setShops([]);
+          setTotalItems(0);
+        } else {
+          setError(
+            `Server Error: ${
+              error.response.data.message || "Unknown error occurred"
+            }`
+          );
+        }
+      } else if (error.request) {
+        setError("No response from server. Please check your connection.");
+      } else {
+        setError("An error occurred while processing your request.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, itemsPerPage, searchQuery]);
 
   useEffect(() => {
-    const filtered = shops.filter((shop) =>
-      shop.products.some(
-        (product) =>
-          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.stock.toString().includes(searchQuery) ||
-          product.price.toString().includes(searchQuery)
-      )
-    );
-    setFilterProduct(filtered);
-    setCurrentPage(1);
-  }, [searchQuery, shops]);
+    fetchShops();
+  }, [fetchShops]);
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = (searchQuery ? filterProduct : shops).slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
-  const totalPages = Math.ceil(
-    (searchQuery ? filterProduct.length : shops.length) / itemsPerPage
-  );
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const handlePreviousPage = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
@@ -82,7 +108,7 @@ const App = () => {
       path: "/",
       element: (
         <HomeView
-          shops={paginatedData}
+          shops={shops}
           error={error}
           loading={loading}
           searchQuery={searchQuery}
