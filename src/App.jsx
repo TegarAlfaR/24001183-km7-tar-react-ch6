@@ -13,6 +13,11 @@ const App = () => {
   const [shops, setShops] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterProduct, setFilterProduct] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     const fetchShops = async () => {
@@ -37,10 +42,59 @@ const App = () => {
     fetchShops();
   }, []);
 
+  useEffect(() => {
+    const filtered = shops.filter((shop) =>
+      shop.products.some(
+        (product) =>
+          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.stock.toString().includes(searchQuery) ||
+          product.price.toString().includes(searchQuery)
+      )
+    );
+    setFilterProduct(filtered);
+    setCurrentPage(1);
+  }, [searchQuery, shops]);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = (searchQuery ? filterProduct : shops).slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+  const totalPages = Math.ceil(
+    (searchQuery ? filterProduct.length : shops.length) / itemsPerPage
+  );
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+  };
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value));
+    setCurrentPage(1);
+  };
+
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <HomeView shops={shops} error={error} loading={loading} />,
+      element: (
+        <HomeView
+          shops={paginatedData}
+          error={error}
+          loading={loading}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          handlePreviousPage={handlePreviousPage}
+          handleNextPage={handleNextPage}
+          handleItemsPerPageChange={handleItemsPerPageChange}
+          itemsPerPage={itemsPerPage}
+        />
+      ),
     },
     {
       path: "/about",
