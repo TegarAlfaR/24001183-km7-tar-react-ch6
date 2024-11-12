@@ -1,9 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import {
+  Navigate,
+  RouterProvider,
+  createBrowserRouter,
+} from "react-router-dom";
 import HomeView from "./page/ProductsView";
 import Login from "./page/Login";
 import NavbarTailwind from "./components/navbar/NavbarTailwind";
+import NotFoundView from "./page/NotFoundView";
 
 const App = () => {
   const [shops, setShops] = useState([]);
@@ -98,24 +103,45 @@ const App = () => {
     setCurrentPage(1);
   };
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // check user login atau ngga
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    setIsAuthenticated(false);
+  };  
+
   const router = createBrowserRouter([
     {
       path: "/",
       element: (
         <>
-          <HomeView
-            shops={shops}
-            error={error}
-            loading={loading}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            handlePreviousPage={handlePreviousPage}
-            handleNextPage={handleNextPage}
-            handleItemsPerPageChange={handleItemsPerPageChange}
-            itemsPerPage={itemsPerPage}
-          />
+          {isAuthenticated ? (
+            <>
+              <NavbarTailwind onLogout={handleLogout} />
+              <HomeView
+                shops={shops}
+                error={error}
+                loading={loading}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                handlePreviousPage={handlePreviousPage}
+                handleNextPage={handleNextPage}
+                handleItemsPerPageChange={handleItemsPerPageChange}
+                itemsPerPage={itemsPerPage}
+              />
+            </>
+          ) : (
+            <Navigate to="/login" />
+          )}
         </>
       ),
     },
@@ -123,10 +149,19 @@ const App = () => {
       path: "/login",
       element: (
         <>
-          <NavbarTailwind />
-          <Login />,
+          {isAuthenticated ? (
+            <>
+              <Navigate to="/" />
+            </>
+          ) : (
+            <Login />
+          )}
         </>
       ),
+    },
+    {
+      path: "*",
+      element: <NotFoundView />,
     },
   ]);
 

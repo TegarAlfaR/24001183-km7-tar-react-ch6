@@ -20,7 +20,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-function NavbarTailwind() {
+function NavbarTailwind({ onLogout }) {
   return (
     <Disclosure as="nav" className="bg-gray-800">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -112,12 +112,13 @@ function NavbarTailwind() {
                   </a>
                 </MenuItem>
                 <MenuItem>
-                  <a
+                  <button
                     href="#"
                     className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:outline-none"
+                    onClick={onLogout}
                   >
                     Sign out
-                  </a>
+                  </button>
                 </MenuItem>
               </MenuItems>
             </Menu>

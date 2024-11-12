@@ -1,10 +1,14 @@
 import { useState } from "react";
 import axios from "axios";
+import Notification from "../components/Notifications/Notification";
+import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [notification, setNotification] = useState(null);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -24,14 +28,55 @@ function Login() {
 
         localStorage.setItem("token", token);
         localStorage.setItem("username", username);
+
+        setNotification({
+          type: "success",
+          message: response.data.message || "Successfuly login",
+          description: "Youre redirect to home page",
+        });
+
+        setTimeout(() => {
+          setNotification(null);
+          navigate("/");
+          navigate(0);
+        }, 2000);
+
+        // setTimeout(() => {
+        //   navigate("/");
+        //   navigate(0);
+        // });
+
+        console.log("berhasil link");
+      } else {
+        console.log("Haii ini di login");
       }
     } catch (error) {
-      console.log(error.message);
+      console.log(error.response.data.message);
+
+      setNotification({
+        type: "error",
+        message: error.response.data.message || "An error uncured",
+        description: "Try again",
+      });
     }
+
+    setTimeout(() => setNotification(null), 3000);
   };
 
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+      {notification && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          description={notification.description}
+          onClose={() => {
+            setNotification(null);
+            navigate(0);
+          }}
+        />
+      )}
+
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <img
           alt="Your Company"

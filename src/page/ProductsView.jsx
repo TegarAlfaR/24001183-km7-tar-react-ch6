@@ -27,7 +27,7 @@ function HomeView({
 
   return (
     <>
-      <nav className="fixed top-0 left-0 w-full bg-white shadow-md z-10">
+      {/* <nav className="fixed top-0 left-0 w-full bg-white shadow-md z-10">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-green-600">Shop Products</h1>
           <ul className="hidden md:flex space-x-6 text-gray-700">
@@ -90,7 +90,7 @@ function HomeView({
             <li className="hover:text-green-600 cursor-pointer">Contact</li>
           </ul>
         </div>
-      </div>
+      </div> */}
 
       {loading && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-100">
