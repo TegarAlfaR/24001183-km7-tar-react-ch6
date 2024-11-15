@@ -4,13 +4,16 @@ import {
   Navigate,
   RouterProvider,
   createBrowserRouter,
+  useNavigate,
 } from "react-router-dom";
 import HomeView from "./page/ProductsView";
 import Login from "./page/Login";
 import NavbarTailwind from "./components/navbar/NavbarTailwind";
 import NotFoundView from "./page/NotFoundView";
+import { isTokenExpired } from "../Utils/auth";
 
 const App = () => {
+  const navigate = useNavigate;
   const [shops, setShops] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,6 +49,12 @@ const App = () => {
 
     try {
       const token = localStorage.getItem("token");
+
+      if (!token || isTokenExpired(token)) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        navigate("/login");
+      }
 
       const response = await axios.get("http://localhost:3000/api/v1/shops", {
         params: getSearchParams(searchQuery),
@@ -115,7 +124,7 @@ const App = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     setIsAuthenticated(false);
-  };  
+  };
 
   const router = createBrowserRouter([
     {
